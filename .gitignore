@@ -1,0 +1,74 @@
+.DS_Store
+.env
+.env.*
+*.log
+*.db
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Python caches
+.pytest_cache/
+.mypy_cache/
+.pyre/
+.hypothesis/
+
+# IDE files
+.idea/
+.vscode/
+*.code-workspace
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# Local settings
+instance/
+*.pem
+
+# Uvicorn reload cache
+*.pid
+
+# ==========================
+# Node / React TypeScript Frontend
+# ==========================
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Cache
+.cache/
+.parcel-cache/
+.next/
+coverage/
+
+# React
+*.lock
+
+# ==========================
+# Docker
+# ==========================
+docker-compose.override.yml
+*.pid
