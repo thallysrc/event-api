@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./styles.css";
-import Modal from "./components/Modal";
 import EventCard from "./components/EventCard";
 import Header from "./components/Header";
 
@@ -53,10 +52,20 @@ export default function App(): JSX.Element {
 
     fetchEventos();
 
+    
+  }, []);
+
+  // 🔥 FIX: ensure icons always update
+  useEffect(() => {
     try {
+      // remove duplicated SVG nodes
+      document
+        .querySelectorAll("svg[data-lucide]")
+        .forEach((el) => el.remove());
+
       lucide?.createIcons();
     } catch {}
-  }, [eventos, termoBusca, detalheAberto, formAberto]);
+  }, [eventos, detalheAberto, formAberto]);
 
   const eventosFiltrados = useMemo(
     () =>
@@ -172,60 +181,187 @@ export default function App(): JSX.Element {
       </button>
 
       {detalheAberto && (
-        <Modal onClose={fecharDetalhes} title={detalheAberto.titulo}>
-          <p>
-            {detalheAberto.data} • {detalheAberto.hora} • {detalheAberto.local}
-          </p>
-          <p>
-            {detalheAberto.participantes} participantes • {detalheAberto.preco}
-          </p>
-        </Modal>
+        <div className="modal-overlay" onClick={fecharDetalhes}>
+          <div
+            className="modal-card slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button onClick={fecharDetalhes} className="btn-fechar-modal">
+              <i data-lucide="x"></i>
+            </button>
+
+            <div className="detalhe-header">
+              <img src={detalheAberto.imagem} className="detalhe-img" />
+              <div className="detalhe-overlay"></div>
+              <div className="detalhe-texto-header">
+                <span className="selo mb-1">Música</span>
+                <h2 className="detalhe-titulo">{detalheAberto.titulo}</h2>
+                <span className="selo bg-white text-primary">
+                  {detalheAberto.preco}
+                </span>
+              </div>
+            </div>
+
+            <div className="detalhe-corpo">
+              <div className="detalhe-grid-info">
+                <div className="info-linha">
+                  <i data-lucide="calendar"></i>
+                  <span>{detalheAberto.data}</span>
+                </div>
+
+                <div className="info-linha">
+                  <i data-lucide="map-pin"></i>
+                  <span>{detalheAberto.local}</span>
+                </div>
+
+                <div className="info-linha">
+                  <i data-lucide="users"></i>
+                  <span>{detalheAberto.participantes}</span>
+                </div>
+              </div>
+
+              <h3 className="detalhe-sobre">Sobre</h3>
+              <p className="detalhe-desc">
+                Prepare-se para uma experiência incrível! Este evento promete ser memorável.
+              </p>
+
+            </div>
+          </div>
+        </div>
       )}
 
       {formAberto && (
-        <Modal
-          onClose={fecharModalFormulario}
-          title={formData.id ? "Editar Evento" : "Novo Evento"}
-        >
-          <form onSubmit={salvarEvento}>
-            <div className="grupo-form">
-              <label>Nome</label>
-              <input
-                className="input-form"
-                value={formData.titulo || ""}
-                onChange={(e) =>
-                  setFormData((s) => ({ ...s, titulo: e.target.value }))
-                }
-                required
-              />
-            </div>
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && fecharModalFormulario()}>
+          <div className="modal-card slide-up">
+            
+            <div className="cabecalho-form">
+              <h2 className="titulo-form-modal">
+                {formData.id ? "Editar Evento" : "Novo Evento"}
+              </h2>
 
-            <div className="grupo-form">
-              <label>Data</label>
-              <input
-                className="input-form"
-                value={formData.data || ""}
-                onChange={(e) =>
-                  setFormData((s) => ({ ...s, data: e.target.value }))
-                }
-              />
-            </div>
-
-            <div className="acoes-form">
-              <button
-                type="button"
-                onClick={fecharModalFormulario}
-                className="btn btn-contorno"
-              >
-                Cancelar
-              </button>
-              <button type="submit" className="btn btn-gradiente">
-                Salvar
+              <button onClick={fecharModalFormulario} className="btn-fechar-form">
+                <i data-lucide="x"></i>
               </button>
             </div>
-          </form>
-        </Modal>
+
+            <form
+              className="corpo-form"
+              onSubmit={salvarEvento}
+            >
+              <div className="grupo-form">
+                <label className="label-form">Nome</label>
+                <input
+                  type="text"
+                  required
+                  className="input-form"
+                  value={formData.titulo || ""}
+                  onChange={(e) => setFormData(s => ({ ...s, titulo: e.target.value }))}
+                />
+              </div>
+
+              <div className="grade-campos">
+                <div className="grupo-form">
+                  <label className="label-form">Data</label>
+                  <input
+                    type="text"
+                    required
+                    className="input-form"
+                    value={formData.data || ""}
+                    onChange={(e) => setFormData(s => ({ ...s, data: e.target.value }))}
+                  />
+                </div>
+
+                <div className="grupo-form">
+                  <label className="label-form">Horário</label>
+                  <input
+                    type="text"
+                    required
+                    className="input-form"
+                    value={formData.hora || ""}
+                    onChange={(e) => setFormData(s => ({ ...s, hora: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grupo-form">
+                <label className="label-form">Local</label>
+                <input
+                  type="text"
+                  required
+                  className="input-form"
+                  value={formData.local || ""}
+                  onChange={(e) => setFormData(s => ({ ...s, local: e.target.value }))}
+                />
+              </div>
+
+              <div className="grupo-form">
+                <label className="label-form">Categoria</label>
+                <select
+                  className="input-form"
+                  value={formData.categoria || ""}
+                  onChange={(e) => setFormData(s => ({ ...s, categoria: e.target.value }))}
+                >
+                  <option>Música</option>
+                  <option>Gastronomia</option>
+                  <option>Arte</option>
+                  <option>Esportes</option>
+                  <option>Teatro</option>
+                  <option>Festas</option>
+                </select>
+              </div>
+
+              <div className="grupo-form">
+                <label className="label-form">Imagem URL</label>
+                <input
+                  type="url"
+                  required
+                  className="input-form"
+                  value={formData.imagem || ""}
+                  onChange={(e) => setFormData(s => ({ ...s, imagem: e.target.value }))}
+                />
+              </div>
+
+              <div className="grade-campos">
+                <div className="grupo-form">
+                  <label className="label-form">Participantes</label>
+                  <input
+                    type="number"
+                    className="input-form"
+                    value={formData.participantes || ""}
+                    onChange={(e) => setFormData(s => ({ ...s, participantes: e.target.value }))}
+                  />
+                </div>
+
+                <div className="grupo-form">
+                  <label className="label-form">Preço</label>
+                  <input
+                    type="text"
+                    required
+                    className="input-form"
+                    value={formData.preco || ""}
+                    onChange={(e) => setFormData(s => ({ ...s, preco: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="acoes-form">
+                <button
+                  type="button"
+                  onClick={fecharModalFormulario}
+                  className="btn btn-contorno btn-expandido"
+                >
+                  Cancelar
+                </button>
+
+                <button type="submit" className="btn btn-gradiente btn-expandido">
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
+
     </div>
   );
 }
