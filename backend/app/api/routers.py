@@ -1,8 +1,8 @@
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 
 from fastapi import APIRouter, Depends
 
-from app.api.schemas import Concert
+from app.api.schemas import Concert, ConcertIn
 from app.infrastructure.database.connection import get_db
 from app.infrastructure.repositories.concert_repository import ConcertRepository
 from app.application.services.concert_service import ConcertService
@@ -17,19 +17,20 @@ def get_concert_service(repo=Depends(get_concert_repository)):
 
 ConcertServiceDp = Annotated[ConcertService, Depends(get_concert_service)]
 
-@router.post("", response_model=List[Concert])
+
+@router.post("", response_model=Concert)
 async def create_concert(
-    data: Concert,
+    data: ConcertIn,
     service: ConcertServiceDp,
 ):
     return await service.create(data)
 
-@router.get("/{concert_id}", response_model=List[Concert])
+@router.get("", response_model=List[Concert])
 async def get_concert(
-    data: Concert,
     service: ConcertServiceDp,
+    concert_id: Optional[int] = None
 ):
-    return await service.get_all(data)
+    return await service.get(id=concert_id)
 
 @router.put("/{concert_id}", response_model=List[Concert])
 async def update_concert(
