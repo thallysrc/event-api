@@ -29,42 +29,52 @@ export default function EventCard({
   onViewDetails,
 }: Props) {
   return (
-    <div className="cartao" key={ev.id}>
+    <div className="cartao">
       <div className="cartao-cabecalho">
         <img
           src={ev.imagem}
+          alt={ev.titulo}
           className="cartao-img"
-          onError={(e) =>
-            ((e.target as HTMLImageElement).src = "https://placehold.co/600x400")
-          }
+          onError={(e) => {
+            const target = e.currentTarget;
+            target.src = "https://placehold.co/600x400";
+          }}
         />
+
         <div className="cartao-overlay" />
+
         {modoParceiro && (
           <div className="cartao-acoes">
             <button
               onClick={() => onEdit(ev.id)}
               className="btn-acao btn-editar"
             >
-              <i data-lucide="edit-2"></i>
+              <i data-lucide="edit-2" />
             </button>
+
             <button
               onClick={() => onDelete(ev.id)}
               className="btn-acao btn-excluir"
             >
-              <i data-lucide="trash-2"></i>
+              <i data-lucide="trash-2" />
             </button>
           </div>
         )}
+
         <div className="cartao-preco">{ev.preco}</div>
       </div>
+
       <div className="cartao-corpo">
         <h3 className="cartao-titulo">{ev.titulo}</h3>
+
         <div className="info-linha">
-          <i data-lucide="calendar"></i> {ev.data}
+          <i data-lucide="calendar" /> {ev.data}
         </div>
+
         <div className="info-linha">
-          <i data-lucide="map-pin"></i> {ev.local}
+          <i data-lucide="map-pin" /> {ev.local}
         </div>
+
         <button
           onClick={() => onViewDetails(ev.id)}
           className="btn btn-gradiente btn-detalhes"

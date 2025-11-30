@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./styles.css";
 import Modal from "./components/Modal";
 import EventCard from "./components/EventCard";
+import Header from "./components/Header";
 
 // lucide is loaded from CDN in index.html; declare to avoid TS errors
 declare const lucide: any;
@@ -19,49 +20,43 @@ type EventItem = {
   valorData: Date;
 };
 
-const initialEventos: EventItem[] = [
-  {
-    id: 1,
-    titulo: "Festival de Rock",
-    data: "25/11/2025",
-    hora: "20:00",
-    local: "Arena Central",
-    imagem:
-      "https://images.unsplash.com/photo-1656283384093-1e227e621fad?auto=format&fit=crop&w=800&q=80",
-    participantes: 2500,
-    preco: "R$ 80,00",
-    valorPreco: 80,
-    valorData: new Date("2025-11-25"),
-  },
-  {
-    id: 2,
-    titulo: "Feira Gastronômica",
-    data: "22/11/2025",
-    hora: "12:00",
-    local: "Parque City",
-    imagem:
-      "https://images.unsplash.com/photo-1678646142794-253fdd20fa05?auto=format&fit=crop&w=800&q=80",
-    participantes: 1800,
-    preco: "Grátis",
-    valorPreco: 0,
-    valorData: new Date("2025-11-22"),
-  },
-];
+const initialEventos: EventItem[] = [];
 
 export default function App(): JSX.Element {
   const [eventos, setEventos] = useState<EventItem[]>(initialEventos);
   const [termoBusca, setTermoBusca] = useState("");
-  const [modoParceiro, setModoParceiro] = useState(false);
 
   const [detalheAberto, setDetalheAberto] = useState<EventItem | null>(null);
   const [formAberto, setFormAberto] = useState(false);
   const [formData, setFormData] = useState<Partial<EventItem>>({});
 
   useEffect(() => {
+    async function fetchEventos() {
+      const res = await fetch("http://127.0.0.1:8000/concerts");
+      const data = await res.json();
+
+      const convertidos: EventItem[] = data.map((c: any) => ({
+        id: c.id,
+        titulo: c.name,
+        data: new Date(c.date).toLocaleDateString("pt-BR"),
+        hora: "",
+        local: c.location,
+        imagem: c.image_url,
+        participantes: c.participants ?? 0,
+        preco: c.price ? `R$ ${c.price}` : "Grátis",
+        valorPreco: c.price ?? 0,
+        valorData: new Date(c.date),
+      }));
+
+      setEventos(convertidos);
+    }
+
+    fetchEventos();
+
     try {
       lucide?.createIcons();
     } catch {}
-  }, [eventos, termoBusca, modoParceiro, detalheAberto, formAberto]);
+  }, [eventos, termoBusca, detalheAberto, formAberto]);
 
   const eventosFiltrados = useMemo(
     () =>
@@ -74,6 +69,7 @@ export default function App(): JSX.Element {
   function abrirDetalhes(id: number) {
     setDetalheAberto(eventos.find((e) => e.id === id) || null);
   }
+
   function fecharDetalhes() {
     setDetalheAberto(null);
   }
@@ -83,6 +79,7 @@ export default function App(): JSX.Element {
     else setFormData({});
     setFormAberto(true);
   }
+
   function fecharModalFormulario() {
     setFormAberto(false);
     setFormData({});
@@ -123,33 +120,7 @@ export default function App(): JSX.Element {
 
   return (
     <div className="app-root">
-      <header>
-        <div className="container cabecalho-container">
-          <div className="espaco-flex" />
-          <div className="grupo-logo">
-            <div className="caixa-logo">
-              <i data-lucide="calendar"></i>
-            </div>
-            <div>
-              <h1 className="texto-logo">EventoCity</h1>
-              <p className="subtitulo-logo">Agenda Cultural</p>
-            </div>
-          </div>
-          <div className="grupo-acoes-header">
-            <button
-              onClick={() => setModoParceiro((v) => !v)}
-              className={`btn btn-contorno ${
-                modoParceiro ? "btn-parceiro-ativo" : ""
-              }`}
-            >
-              <i data-lucide="user-cog"></i>
-              <span>
-                {modoParceiro ? "Sair do Modo Parceiro" : "Modo Parceiro"}
-              </span>
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="container area-principal">
         <div className="caixa-busca">
@@ -182,7 +153,7 @@ export default function App(): JSX.Element {
               <EventCard
                 key={ev.id}
                 ev={ev}
-                modoParceiro={modoParceiro}
+                modoParceiro={true}
                 onEdit={abrirModalFormulario}
                 onDelete={excluirEvento}
                 onViewDetails={abrirDetalhes}
@@ -195,7 +166,7 @@ export default function App(): JSX.Element {
       <button
         onClick={() => abrirModalFormulario()}
         id="btn-flutuante-add"
-        className={`btn-flutuante ${modoParceiro ? "" : "oculto"}`}
+        className="btn-flutuante"
       >
         <i data-lucide="plus"></i>
       </button>
